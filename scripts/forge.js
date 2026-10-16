@@ -89,6 +89,29 @@ export async function searchSpells(query, { maxRank, tradition, limit = 30 } = {
     .slice(0, limit);
 }
 
+/**
+ * Данные документа из компендиума — с переводом Babele (pf2e-ru), если он есть.
+ * fromUuid отдаёт оригинал на английском; перевод накладываем сами, как это делает импорт Foundry.
+ */
+export async function localizedData(doc) {
+  const data = doc.toObject();
+  const babele = game.babele;
+  if (!babele || !doc.pack) return data;
+  try {
+    let tr = babele.translate?.(doc.pack, data, false);
+    if (tr instanceof Promise) tr = await tr;
+    if (tr && typeof tr === "object" && tr.name) return tr;
+  } catch (e) {
+    console.warn("[pf2e-creature-forge] перевод Babele не удался", doc.uuid, e);
+  }
+  // Запасной путь: хотя бы название из переведённого индекса.
+  try {
+    const entry = (await game.packs.get(doc.pack)?.getIndex())?.get(doc.id);
+    if (entry?.name && entry.name !== data.name) data.name = entry.name;
+  } catch { /* ignore */ }
+  return data;
+}
+
 /** Найти документ по uuid или по имени (точное, иначе первое совпадение). */
 async function resolveItem(ref, searcher) {
   if (ref.uuid) return fromUuid(ref.uuid);
@@ -122,7 +145,7 @@ export async function createCreature(spec, { openSheet = true } = {}) {
     if (ref.fromRole && roleAbilityAdded) continue;
     const doc = await resolveItem(ref, (q) => searchAbilities(q, 5));
     if (doc) {
-      abilityDocs.push(doc.toObject());
+      abilityDocs.push(await localizedData(doc));
       if (ref.fromRole) roleAbilityAdded = true;
     } else if (!ref.optional) {
       missing.push(ref.name ?? ref.uuid);
@@ -157,7 +180,7 @@ async function addSpellcasting(actor, sc, missing) {
   for (const ref of sc.spells ?? []) {
     const doc = await resolveItem(ref, (q) => searchSpells(q, { limit: 5 }));
     if (!doc) { missing.push(ref.name ?? ref.uuid); continue; }
-    const d = doc.toObject();
+    const d = await localizedData(doc);
     delete d._id;
     const baseRank = d.system.traits?.value?.includes("cantrip") ? 0 : d.system.level?.value ?? 1;
     const rank = Math.max(baseRank, Number(ref.rank ?? baseRank));
