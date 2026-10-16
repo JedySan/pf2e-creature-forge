@@ -1,6 +1,6 @@
 {
   "id": "jedysan-kuznya",
-  "title": "PF2e Кузня существ",
+  "title": "Кузня существ",
   "description": "Конструктор монстров и NPC для Pathfinder 2e по таблицам GM Core: мастер по ролям, удары, заклинания, сопротивления, способности из компендиумов и подсказки ступеней в листе NPC. Есть API для PF2e Claude Bridge.",
   "version": "0.2.0",
   "authors": [{ "name": "JedySan" }],
