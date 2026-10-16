@@ -1,7 +1,7 @@
 // Кузня существ — точка входа.
 import { CreatureForge } from "./wizard.js";
 import { registerSheetHints } from "./sheet-hints.js";
-import { createCreature, searchAbilities, searchSpells, MODULE_ID } from "./forge.js";
+import { createCreature, searchAbilities, searchSpells, MODULE_ID, DEFAULT_FOLDER, folderName, ensureFolder, migrateLegacyFolders } from "./forge.js";
 import { computeStats, toActorData } from "./builder.js";
 import { ROLES, applyRole, emptySpec, maxSpellRank } from "./roles.js";
 import * as tables from "./tables.js";
@@ -11,6 +11,11 @@ Hooks.once("init", () => {
     name: "Подсказки тиров в листе NPC",
     hint: "Рядом с КБ, HP, спасбросками, Восприятием и характеристиками — ступень GM Core для уровня существа.",
     scope: "client", config: true, type: Boolean, default: true,
+  });
+  game.settings.register(MODULE_ID, "folderName", {
+    name: "Папка для созданных врагов",
+    hint: "Сюда кладутся существа из Кузни и монстры, которых импортирует PF2e Claude Bridge.",
+    scope: "world", config: true, type: String, default: DEFAULT_FOLDER,
   });
   registerSheetHints();
 });
@@ -33,7 +38,14 @@ Hooks.once("ready", () => {
     maxSpellRank,
     tables,
     toActorData,
+    /** Общая папка для созданных врагов (её же использует PF2e Claude Bridge). */
+    folderName,
+    ensureFolder,
   };
+
+  if (game.users.activeGM?.isSelf) {
+    migrateLegacyFolders().catch((e) => console.error("[pf2e-creature-forge] перенос папок", e));
+  }
 });
 
 // Кнопка в каталоге актёров (только ГМ).

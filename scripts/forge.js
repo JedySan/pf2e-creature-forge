@@ -2,7 +2,29 @@
 import { computeStats, toActorData } from "./builder.js";
 
 export const MODULE_ID = "pf2e-creature-forge";
-export const FOLDER_NAME = "Кузня существ";
+export const DEFAULT_FOLDER = "Созданные враги";
+// Папки прошлых версий Кузни и PF2e Claude Bridge — их содержимое переносится в общую.
+const LEGACY_FOLDERS = ["Кузня существ", "Claude — энкаунтеры"];
+
+export function folderName() {
+  try { return game.settings.get(MODULE_ID, "folderName")?.trim() || DEFAULT_FOLDER; } catch { return DEFAULT_FOLDER; }
+}
+
+/** Слить старые папки в общую (один раз при запуске, у ГМа). */
+export async function migrateLegacyFolders() {
+  const target = folderName();
+  for (const old of LEGACY_FOLDERS) {
+    if (old === target) continue;
+    const src = game.folders.find((f) => f.type === "Actor" && f.name === old);
+    if (!src) continue;
+    const dest = await ensureFolder();
+    const actors = game.actors.filter((a) => a.folder?.id === src.id);
+    if (actors.length) await Actor.implementation.updateDocuments(actors.map((a) => ({ _id: a.id, folder: dest.id })));
+    const hasChildren = game.folders.some((f) => f.folder?.id === src.id);
+    if (!hasChildren) await src.delete();
+    console.info(`[pf2e-creature-forge] папка «${old}» → «${target}» (${actors.length} актёров)`);
+  }
+}
 
 const ABILITY_PACKS = ["pf2e.bestiary-ability-glossary-srd", "pf2e.bestiary-family-ability-glossary"];
 const SPELL_PACK = "pf2e.spells-srd";
@@ -10,9 +32,10 @@ const SPELL_PACK = "pf2e.spells-srd";
 export const TRADITION_RU = { arcane: "Арканные", divine: "Сакральные", occult: "Оккультные", primal: "Природные" };
 export const CAST_TYPE_RU = { innate: "врождённые", prepared: "подготовленные", spontaneous: "спонтанные" };
 
-async function ensureFolder() {
-  let folder = game.folders.find((f) => f.type === "Actor" && f.name === FOLDER_NAME);
-  if (!folder) folder = await Folder.create({ name: FOLDER_NAME, type: "Actor", color: "#7a3b12" });
+export async function ensureFolder() {
+  const name = folderName();
+  let folder = game.folders.find((f) => f.type === "Actor" && f.name === name);
+  if (!folder) folder = await Folder.create({ name, type: "Actor", color: "#7a3b12" });
   return folder;
 }
 
