@@ -2,11 +2,13 @@
 .pf2e-forge .window-content { padding: 0; }
 .pf2e-forge form.forge { display: flex; flex-direction: column; height: 100%; font-size: 13px; }
 .pf2e-forge .head { padding: 8px 10px; border-bottom: 1px solid var(--color-border, #555); }
-.pf2e-forge .cols { flex: 1; display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; padding: 6px 10px; overflow-y: auto; }
+.pf2e-forge .cols { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 14px; padding: 6px 10px; overflow-y: auto; overflow-x: hidden; }
+.pf2e-forge .cols > section { min-width: 0; }
 .pf2e-forge h3 { margin: 10px 0 4px; font-size: 13px; border-bottom: 1px solid var(--color-border-light-2, #777); display: flex; justify-content: space-between; align-items: center; }
 .pf2e-forge h3 a { cursor: pointer; font-size: 15px; }
 .pf2e-forge .row { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
-.pf2e-forge .row > label { flex: 0 0 auto; min-width: 70px; }
+.pf2e-forge .row > label { flex: 0 0 100px; width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf2e-forge .head .row > label { flex-basis: auto; width: auto; }
 .pf2e-forge .row label.check { min-width: 0; display: flex; align-items: center; gap: 4px; }
 .pf2e-forge .row input[type="text"], .pf2e-forge .row select { flex: 1; min-width: 0; }
 .pf2e-forge .row input[type="number"] { width: 64px; flex: 0 0 64px; text-align: center; }
@@ -19,6 +21,12 @@
 .pf2e-forge .row.result { padding-left: 8px; border-left: 2px solid #8957e5; }
 .pf2e-forge .speeds label { min-width: 0; }
 .pf2e-forge .strike { border: 1px solid var(--color-border-light-2, #777); border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; }
+.pf2e-forge .strike .row { flex-wrap: wrap; }
+.pf2e-forge .strike .row > label { flex: 0 0 auto; width: auto; }
+.pf2e-forge .strike .row select { flex: 1 1 110px; min-width: 110px; }
+.pf2e-forge .strike .row input[type="text"] { flex: 1 1 140px; min-width: 120px; }
+.pf2e-forge .strike .row input.dmg { flex: 0 0 90px; min-width: 90px; }
+.pf2e-forge h3 a { padding-right: 4px; }
 .pf2e-forge .muted { opacity: 0.7; }
 .pf2e-forge .small { font-size: 11px; margin: 2px 0 4px; }
 .pf2e-forge textarea { width: 100%; resize: vertical; }

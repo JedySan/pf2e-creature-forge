@@ -49,7 +49,7 @@ export class CreatureForge extends ApplicationV2 {
         <input type="number" data-num="${path}" value="${value}">
       </div>`;
 
-    const attrs = Object.keys(ATTR_RU).map((a) => statRow(ATTR_RU[a], "attribute", `attributes.${a}`, sign(st.attributes[a]), s.attributes[a])).join("");
+    const attrs = Object.keys(ATTR_RU).map((a) => statRow(ATTR_RU[a], "attribute", `attributes.${a}`, st.attributes[a], s.attributes[a])).join("");
     const saves = Object.keys(SAVE_RU).map((k) => statRow(SAVE_RU[k], "save", `saves.${k}`, st.saves[k], s.saves[k])).join("");
     const [hpLo, hpHi] = hpRange(lvl, typeof s.hp === "string" ? s.hp : "moderate");
 
