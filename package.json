@@ -1,0 +1,6 @@
+{
+  "name": "pf2e-creature-forge",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node tests/tables.test.mjs && node tests/builder.test.mjs && node tests/wizard.test.mjs" }
+}
