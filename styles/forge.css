@@ -1,0 +1,38 @@
+/* Кузня существ */
+.pf2e-forge .window-content { padding: 0; }
+.pf2e-forge form.forge { display: flex; flex-direction: column; height: 100%; font-size: 13px; }
+.pf2e-forge .head { padding: 8px 10px; border-bottom: 1px solid var(--color-border, #555); }
+.pf2e-forge .cols { flex: 1; display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; padding: 6px 10px; overflow-y: auto; }
+.pf2e-forge h3 { margin: 10px 0 4px; font-size: 13px; border-bottom: 1px solid var(--color-border-light-2, #777); display: flex; justify-content: space-between; align-items: center; }
+.pf2e-forge h3 a { cursor: pointer; font-size: 15px; }
+.pf2e-forge .row { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
+.pf2e-forge .row > label { flex: 0 0 auto; min-width: 70px; }
+.pf2e-forge .row label.check { min-width: 0; display: flex; align-items: center; gap: 4px; }
+.pf2e-forge .row input[type="text"], .pf2e-forge .row select { flex: 1; min-width: 0; }
+.pf2e-forge .row input[type="number"] { width: 64px; flex: 0 0 64px; text-align: center; }
+.pf2e-forge .row input.short { width: 52px; flex: 0 0 52px; }
+.pf2e-forge .row input.dmg { flex: 0 0 90px; text-align: center; }
+.pf2e-forge .row input.name { font-size: 15px; font-weight: 600; }
+.pf2e-forge .row .grow { flex: 1; }
+.pf2e-forge .row a[data-action] { cursor: pointer; padding: 0 4px; opacity: 0.7; }
+.pf2e-forge .row a[data-action]:hover { opacity: 1; }
+.pf2e-forge .row.result { padding-left: 8px; border-left: 2px solid #8957e5; }
+.pf2e-forge .speeds label { min-width: 0; }
+.pf2e-forge .strike { border: 1px solid var(--color-border-light-2, #777); border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; }
+.pf2e-forge .muted { opacity: 0.7; }
+.pf2e-forge .small { font-size: 11px; margin: 2px 0 4px; }
+.pf2e-forge textarea { width: 100%; resize: vertical; }
+.pf2e-forge footer { border-top: 1px solid var(--color-border, #555); padding: 6px 10px; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+.pf2e-forge footer .warnings { margin: 0; padding-left: 16px; color: #d29922; font-size: 12px; flex: 1; }
+.pf2e-forge footer .ok { color: #3fb950; font-size: 12px; }
+.pf2e-forge footer .buttons { display: flex; gap: 6px; }
+.pf2e-forge footer button.primary { font-weight: 600; }
+
+/* Подсказки тиров в листе NPC */
+.forge-tier { display: inline-block; margin-left: 3px; padding: 0 4px; border-radius: 3px; font-size: 10px; line-height: 14px; font-weight: 600; color: #fff; vertical-align: middle; white-space: nowrap; }
+.forge-tier.extreme { background: #8b1e1e; }
+.forge-tier.high { background: #b35c00; }
+.forge-tier.moderate { background: #4b6b2a; }
+.forge-tier.low { background: #2f5b8a; }
+.forge-tier.terrible { background: #555; }
+.forge-tier.off { outline: 1px dashed #fff; }
