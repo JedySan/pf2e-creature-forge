@@ -2,6 +2,7 @@
 // плюс сводная строка с ударами и заклинаниями.
 import { tierOf, statValue, strikeDamage, spellStats, averageDamage, STAT_TIERS, TIER_RU, TIER_RU_FULL } from "./tables.js";
 import { MODULE_ID } from "./forge.js";
+import { openRescaleDialog } from "./rescale-ui.js";
 
 function badge(stat, level, value) {
   const t = tierOf(stat, level, value);
@@ -59,11 +60,18 @@ function summary(actor) {
     const dc = e.statistic?.dc?.value ?? e.system?.spelldc?.dc;
     if (dc) parts.push(`<b>${e.name}</b>: КС ${dc} — ${TIER_RU[spellTier(level, dc)]}`);
   }
-  if (!parts.length) return null;
+  if (!parts.length && !game.user.isGM) return null;
   const el = document.createElement("div");
   el.className = "forge-summary";
   el.style.cssText = "font-size:11px;padding:3px 8px;opacity:.9;border-bottom:1px solid rgba(127,127,127,.4)";
-  el.innerHTML = `⚒ Кузня, ур. ${level}: ` + parts.join(" · ");
+  el.innerHTML = `⚒ Кузня, ур. ${level}` + (parts.length ? ": " + parts.join(" · ") : "");
+  if (game.user.isGM) {
+    const a = document.createElement("a");
+    a.textContent = " · Сменить уровень";
+    a.style.cssText = "cursor:pointer;text-decoration:underline;margin-left:4px";
+    a.addEventListener("click", (ev) => { ev.preventDefault(); openRescaleDialog(actor); });
+    el.append(a);
+  }
   return el;
 }
 

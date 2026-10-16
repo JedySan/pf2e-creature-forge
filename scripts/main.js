@@ -1,6 +1,7 @@
 // Кузня существ — точка входа.
 import { CreatureForge } from "./wizard.js";
 import { registerSheetHints } from "./sheet-hints.js";
+import { registerRescaleUI, rescaleActor, openRescaleDialog } from "./rescale-ui.js";
 import { createCreature, searchAbilities, searchSpells, MODULE_ID, DEFAULT_FOLDER, folderName, ensureFolder, migrateLegacyFolders } from "./forge.js";
 import { computeStats, toActorData } from "./builder.js";
 import { ROLES, applyRole, emptySpec, maxSpellRank } from "./roles.js";
@@ -18,6 +19,7 @@ Hooks.once("init", () => {
     scope: "world", config: true, type: String, default: DEFAULT_FOLDER,
   });
   registerSheetHints();
+  registerRescaleUI();
 });
 
 Hooks.once("ready", () => {
@@ -41,6 +43,9 @@ Hooks.once("ready", () => {
     /** Общая папка для созданных врагов (её же использует PF2e Claude Bridge). */
     folderName,
     ensureFolder,
+    /** Пересчитать NPC на новый уровень (copy — создать копию). */
+    rescale: (actor, level, opts) => rescaleActor(actor, level, opts),
+    openRescale: (actor) => openRescaleDialog(actor),
   };
 
   if (game.users.activeGM?.isSelf) {
