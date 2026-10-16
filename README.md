@@ -13,6 +13,10 @@ https://github.com/JedySan/pf2e-creature-forge/releases/latest/download/module.j
 
 Требуется система **pf2e**, Foundry v13–v14.
 
+> ID модуля — `jedysan-kuznya`. До версии 0.2.0 он был `pf2e-creature-forge` и совпадал с чужим модулем
+> «PF2E Creature Forge» из каталога Foundry — при обновлении Foundry мог подменить им Кузню.
+> Если у вас стоит «PF2E Creature Forge» 1.1.x вместо Кузни — удалите его и установите Кузню заново по ссылке выше.
+
 ## Мастер
 
 Вкладка **Актёры → кнопка «⚒ Кузня существ»** (видна ГМу).
@@ -51,7 +55,7 @@ https://github.com/JedySan/pf2e-creature-forge/releases/latest/download/module.j
 ## API (для Claude и макросов)
 
 ```js
-const forge = game.modules.get("pf2e-creature-forge").api;
+const forge = game.modules.get("jedysan-kuznya").api;
 forge.open(spec);            // открыть мастер с заготовкой
 await forge.create(spec);    // создать сразу → { actor, stats, warnings, missing }
 forge.preview(spec);         // посчитать числа без создания

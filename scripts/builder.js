@@ -177,6 +177,6 @@ export function toActorData(stats, { img } = {}) {
       traits: { value: stats.traits, rarity: stats.rarity, size: { value: stats.size } },
     },
     items,
-    flags: { "pf2e-creature-forge": { spec: stats.spec ?? null, version: 1 } },
+    flags: { "jedysan-kuznya": { spec: stats.spec ?? null, version: 1 } },
   };
 }

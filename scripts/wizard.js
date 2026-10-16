@@ -21,7 +21,7 @@ function tierOptions(stat, selected) {
 
 export class CreatureForge extends ApplicationV2 {
   static DEFAULT_OPTIONS = {
-    id: "pf2e-creature-forge",
+    id: "jedysan-kuznya",
     classes: ["pf2e-forge"],
     window: { title: "Кузня существ", resizable: true, icon: "fa-solid fa-hammer" },
     position: { width: 900, height: 820 },
@@ -312,7 +312,7 @@ export class CreatureForge extends ApplicationV2 {
       const { actor, warnings, missing } = await createCreature(this.spec);
       ui.notifications.info(`Кузня: создан «${actor.name}»`);
       if (missing.length) ui.notifications.warn(`Не найдено в компендиумах: ${missing.join(", ")}`);
-      if (warnings.length) console.info("[pf2e-creature-forge]", warnings);
+      if (warnings.length) console.info("[jedysan-kuznya]", warnings);
       this.close();
     } catch (e) {
       console.error(e);

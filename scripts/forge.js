@@ -1,7 +1,7 @@
 // Создание актёра в Foundry по спецификации: базовые данные + способности из компендиума + заклинания.
 import { computeStats, toActorData } from "./builder.js";
 
-export const MODULE_ID = "pf2e-creature-forge";
+export const MODULE_ID = "jedysan-kuznya";
 export const DEFAULT_FOLDER = "Созданные враги";
 // Папки прошлых версий Кузни и PF2e Claude Bridge — их содержимое переносится в общую.
 const LEGACY_FOLDERS = ["Кузня существ", "Claude — энкаунтеры"];
@@ -22,7 +22,7 @@ export async function migrateLegacyFolders() {
     if (actors.length) await Actor.implementation.updateDocuments(actors.map((a) => ({ _id: a.id, folder: dest.id })));
     const hasChildren = game.folders.some((f) => f.folder?.id === src.id);
     if (!hasChildren) await src.delete();
-    console.info(`[pf2e-creature-forge] папка «${old}» → «${target}» (${actors.length} актёров)`);
+    console.info(`[jedysan-kuznya] папка «${old}» → «${target}» (${actors.length} актёров)`);
   }
 }
 
@@ -102,7 +102,7 @@ export async function localizedData(doc) {
     if (tr instanceof Promise) tr = await tr;
     if (tr && typeof tr === "object" && tr.name) return tr;
   } catch (e) {
-    console.warn("[pf2e-creature-forge] перевод Babele не удался", doc.uuid, e);
+    console.warn("[jedysan-kuznya] перевод Babele не удался", doc.uuid, e);
   }
   // Запасной путь: хотя бы название из переведённого индекса.
   try {
@@ -187,7 +187,7 @@ async function addSpellcasting(actor, sc, missing) {
     d.system.location = { value: entry.id };
     if (rank > baseRank && baseRank > 0) d.system.location.heightenedLevel = rank;
     if (type === "innate" && baseRank > 0) d.system.location.uses = { value: 1, max: 1 };
-    d.flags = { ...(d.flags ?? {}), "pf2e-creature-forge": { rank } };
+    d.flags = { ...(d.flags ?? {}), "jedysan-kuznya": { rank } };
     spellData.push(d);
   }
   if (!spellData.length) return;
@@ -196,7 +196,7 @@ async function addSpellcasting(actor, sc, missing) {
   if (type === "prepared" || type === "spontaneous") {
     const slots = {};
     for (const sp of created) {
-      const rank = sp.flags?.["pf2e-creature-forge"]?.rank ?? 0;
+      const rank = sp.flags?.["jedysan-kuznya"]?.rank ?? 0;
       const key = `slot${rank}`;
       slots[key] ??= { max: 0, value: 0, prepared: [] };
       if (type === "prepared") {

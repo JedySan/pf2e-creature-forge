@@ -44,7 +44,7 @@ Hooks.once("ready", () => {
   };
 
   if (game.users.activeGM?.isSelf) {
-    migrateLegacyFolders().catch((e) => console.error("[pf2e-creature-forge] перенос папок", e));
+    migrateLegacyFolders().catch((e) => console.error("[jedysan-kuznya] перенос папок", e));
   }
 });
 
