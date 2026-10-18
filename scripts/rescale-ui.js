@@ -53,11 +53,17 @@ export async function openRescaleDialog(actor) {
   }
 }
 
-/** Точки входа: шапка листа (старые листы) и меню правого клика в каталоге актёров. */
+/** Точки входа: шапка листа и меню правого клика в каталоге актёров. */
 export function registerRescaleUI() {
   Hooks.on("getActorSheetHeaderButtons", (sheet, buttons) => {
     if (!game.user.isGM || sheet.actor?.type !== "npc") return;
-    buttons.unshift({ label: "Уровень", class: "forge-rescale", icon: "fa-solid fa-arrows-up-down", onclick: () => openRescaleDialog(sheet.actor) });
+    buttons.unshift({ label: "Сменить уровень", class: "forge-rescale", icon: "fa-solid fa-arrows-up-down", onclick: () => openRescaleDialog(sheet.actor) });
+  });
+  // Листы на ApplicationV2 — кнопка в меню шапки.
+  Hooks.on("getHeaderControlsApplicationV2", (app, controls) => {
+    const actor = app.document ?? app.actor;
+    if (!game.user.isGM || !(actor instanceof Actor) || actor.type !== "npc") return;
+    controls.unshift({ label: "Сменить уровень (Кузня)", icon: "fa-solid fa-arrows-up-down", action: "forgeRescale", onClick: () => openRescaleDialog(actor) });
   });
 
   const entry = (getId) => ({

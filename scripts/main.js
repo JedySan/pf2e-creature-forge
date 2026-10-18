@@ -10,8 +10,8 @@ import * as tables from "./tables.js";
 Hooks.once("init", () => {
   game.settings.register(MODULE_ID, "sheetHints", {
     name: "Подсказки тиров в листе NPC",
-    hint: "Рядом с КБ, HP, спасбросками, Восприятием и характеристиками — ступень GM Core для уровня существа.",
-    scope: "client", config: true, type: Boolean, default: true,
+    hint: "Рядом с КБ, HP, спасбросками, Восприятием и характеристиками — ступень GM Core для уровня существа. Может немного раздвигать поля листа.",
+    scope: "client", config: true, type: Boolean, default: false,
   });
   game.settings.register(MODULE_ID, "folderName", {
     name: "Папка для созданных врагов",
