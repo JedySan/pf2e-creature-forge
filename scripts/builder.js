@@ -16,7 +16,8 @@
 //   spellcasting: null | { tradition, type: "innate|prepared|spontaneous", tier: тир, attribute,
 //                          spells: [{ name | uuid, rank }] },
 //   iwr: [{ kind: "immunity|weakness|resistance", type: "fire", value?: "max|min"|число }],
-//   abilities: [{ uuid } | { name }],
+//   abilities: [{ uuid } | { name } | { custom: true, name, actions: "passive|free|reaction|1|2|3",
+//                traits: ["aura", "emotion"], description }],   // свои: трейты подбираются, если не заданы
 // }
 // Тир: "extreme" | "high" | "moderate" | "low" | "terrible".
 import { statValue, strikeDamage, spellStats, averageDamage, hpRange, TIER_RU } from "./tables.js";

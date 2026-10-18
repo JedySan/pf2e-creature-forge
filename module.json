@@ -2,7 +2,7 @@
   "id": "jedysan-kuznya",
   "title": "Кузня существ",
   "description": "Конструктор монстров и NPC для Pathfinder 2e по таблицам GM Core: мастер по ролям, удары, заклинания, сопротивления, способности из компендиумов и подсказки ступеней в листе NPC. Есть API для PF2e Claude Bridge.",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "authors": [{ "name": "JedySan" }],
   "compatibility": { "minimum": "13", "verified": "14" },
   "relationships": {
@@ -12,7 +12,7 @@
   "styles": ["styles/forge.css"],
   "url": "https://github.com/JedySan/pf2e-creature-forge",
   "manifest": "https://github.com/JedySan/pf2e-creature-forge/releases/latest/download/module.json",
-  "download": "https://github.com/JedySan/pf2e-creature-forge/releases/download/v0.3.1/module.zip",
+  "download": "https://github.com/JedySan/pf2e-creature-forge/releases/download/v0.4.0/module.zip",
   "readme": "https://github.com/JedySan/pf2e-creature-forge#readme",
   "bugs": "https://github.com/JedySan/pf2e-creature-forge/issues"
 }

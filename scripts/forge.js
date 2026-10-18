@@ -1,4 +1,5 @@
 // Создание актёра в Foundry по спецификации: базовые данные + способности из компендиума + заклинания.
+import { customAbilityData } from "./abilities.js";
 import { computeStats, toActorData } from "./builder.js";
 
 export const MODULE_ID = "jedysan-kuznya";
@@ -143,6 +144,10 @@ export async function createCreature(spec, { openSheet = true } = {}) {
   let roleAbilityAdded = false;
   for (const ref of abilityRefs) {
     if (ref.fromRole && roleAbilityAdded) continue;
+    if (ref.custom) {
+      abilityDocs.push(customAbilityData(ref));
+      continue;
+    }
     const doc = await resolveItem(ref, (q) => searchAbilities(q, 5));
     if (doc) {
       abilityDocs.push(await localizedData(doc));

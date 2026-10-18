@@ -3,6 +3,7 @@ import { computeStats } from "./builder.js";
 import { ROLES, applyRole, emptySpec, maxSpellRank } from "./roles.js";
 import { STAT_TIERS, TIER_RU_FULL, MIN_LEVEL, MAX_LEVEL, hpRange } from "./tables.js";
 import { createCreature, searchAbilities, searchSpells, TRADITION_RU, CAST_TYPE_RU } from "./forge.js";
+import { ACTION_TYPES, COMMON_TRAITS, suggestTraits, normalizeTraits } from "./abilities.js";
 import { ATTR_RU, SAVE_RU, SKILL_RU, SIZE_RU, RARITY_RU, DAMAGE_RU, IWR_KIND_RU, IWR_TYPES, TRADITION_LIST } from "./labels.js";
 
 const { ApplicationV2 } = foundry.applications.api;
@@ -11,6 +12,12 @@ const sign = (n) => (n >= 0 ? `+${n}` : `${n}`);
 
 function options(map, selected) {
   return Object.entries(map).map(([v, l]) => `<option value="${esc(v)}"${v === selected ? " selected" : ""}>${esc(l)}</option>`).join("");
+}
+
+/** Трейты способностей pf2e: ключ → русское название (из системы, если она загружена). */
+function traitLabels() {
+  const cfg = globalThis.CONFIG?.PF2E?.actionTraits ?? {};
+  return Object.fromEntries(Object.entries(cfg).map(([k, v]) => [k, game.i18n.localize(v)]));
 }
 
 function tierOptions(stat, selected) {
@@ -111,9 +118,30 @@ export class CreatureForge extends ApplicationV2 {
         <a data-action="remove" data-list="iwr" data-index="${i}" title="Убрать">✕</a>
       </div>`).join("");
 
-    const abilities = (s.abilities ?? []).map((a, i) => `
+    const labels = traitLabels();
+    const abilities = (s.abilities ?? []).map((a, i) => {
+      if (!a.custom) return `
       <div class="row"><span class="grow">${esc(a.name ?? a.uuid)}</span>
-      <a data-action="remove" data-list="abilities" data-index="${i}" title="Убрать">✕</a></div>`).join("");
+      <a data-action="remove" data-list="abilities" data-index="${i}" title="Убрать">✕</a></div>`;
+      const traits = a.traits ?? [];
+      const ru = traits.map((t) => labels[t] ?? t).join(", ");
+      const unknown = Object.keys(labels).length ? traits.filter((t) => !labels[t]) : [];
+      const sugg = suggestTraits(a.name, a.description, a.actions).filter((t) => !traits.includes(t));
+      return `
+      <div class="custom-ability">
+        <div class="row">
+          <input type="text" class="grow" data-path="abilities.${i}.name" value="${esc(a.name)}" placeholder="Название способности">
+          <select data-path="abilities.${i}.actions">${options(ACTION_TYPES, String(a.actions ?? "passive"))}</select>
+          <a data-action="remove" data-list="abilities" data-index="${i}" title="Убрать">✕</a>
+        </div>
+        <div class="row">
+          <input type="text" class="grow" list="pf2e-forge-traits" data-list-text="abilities.${i}.traits" value="${esc(traits.join(", "))}" placeholder="Теги: aura, emotion, fear… (можно по-русски)">
+        </div>
+        ${ru ? `<div class="muted small">Теги: ${esc(ru)}${unknown.length ? ` · <span class="warn">не знаю: ${esc(unknown.join(", "))}</span>` : ""}</div>` : '<div class="muted small warn">Нет тегов — добавьте или возьмите из подсказки</div>'}
+        ${sugg.length ? `<div class="row small">Подсказка: ${sugg.map((t) => `<a class="chip" data-action="add-trait" data-index="${i}" data-trait="${esc(t)}">＋${esc(labels[t] ?? t)}</a>`).join(" ")}</div>` : ""}
+        <textarea data-path="abilities.${i}.description" rows="2" placeholder="Что делает способность">${esc(a.description)}</textarea>
+      </div>`;
+    }).join("");
     const abilityResults = this.abilityResults.map((r, i) => `
       <div class="row result"><span class="grow">${esc(r.name)}</span><span class="muted">${esc(r.pack)}</span>
       <a data-action="add-ability" data-index="${i}">＋</a></div>`).join("");
@@ -159,6 +187,7 @@ export class CreatureForge extends ApplicationV2 {
           <h3>Навыки <a data-action="add-skill">＋</a></h3>${skills || '<div class="muted small">Нет навыков</div>'}
           <h3>Сопротивления и слабости <a data-action="add-iwr">＋</a></h3>
           ${iwr || '<div class="muted small">Нет</div>'}
+          <datalist id="pf2e-forge-traits">${(Object.keys(labels).length ? Object.entries(labels).sort((x, y) => (COMMON_TRAITS.includes(y[0]) - COMMON_TRAITS.includes(x[0])) || x[1].localeCompare(y[1])) : COMMON_TRAITS.map((t) => [t, t])).map(([k, l]) => `<option value="${esc(k)}">${esc(l)}</option>`).join("")}</datalist>
           <datalist id="pf2e-forge-iwr-types">${IWR_TYPES.map((t) => `<option value="${t}">`).join("")}</datalist>
         </section>
 
@@ -181,7 +210,8 @@ export class CreatureForge extends ApplicationV2 {
           <h3>Способности</h3>
           ${abilities || '<div class="muted small">Нет</div>'}
           ${(s.roleAbilities ?? []).length ? `<div class="muted small">Роль добавит: ${esc(s.roleAbilities[0])}</div>` : ""}
-          <div class="row"><input type="text" class="grow" data-search="ability" placeholder="Найти способность: Захват, Реактивный удар…" value="${esc(this.abilityQuery ?? "")}"></div>
+          <div class="row"><input type="text" class="grow" data-search="ability" placeholder="Найти способность: Захват, Реактивный удар…" value="${esc(this.abilityQuery ?? "")}">
+            <button type="button" data-action="add-custom-ability" class="inline">＋ Своя способность</button></div>
           ${abilityResults}
 
           <h3>Описание</h3>
@@ -249,7 +279,8 @@ export class CreatureForge extends ApplicationV2 {
       const n = Number(String(t.value).replace("+", ""));
       if (Number.isFinite(n)) this.#set(d.num, n);
     } else if (d.listText) {
-      this.#set(d.listText, t.value.split(",").map((x) => x.trim()).filter(Boolean));
+      const list = t.value.split(",").map((x) => x.trim()).filter(Boolean);
+      this.#set(d.listText, /^abilities\.\d+\.traits$/.test(d.listText) ? normalizeTraits(list, traitLabels()) : list);
     } else if (d.path) {
       let v = t.type === "checkbox" ? t.checked : t.value;
       if (t.type === "number") v = t.value === "" ? null : Number(t.value);
@@ -275,6 +306,12 @@ export class CreatureForge extends ApplicationV2 {
       case "add-ability": {
         const r = this.abilityResults[Number(a.dataset.index)];
         if (r) (s.abilities ??= []).push({ uuid: r.uuid, name: r.name });
+        break;
+      }
+      case "add-custom-ability": (s.abilities ??= []).push({ custom: true, name: "", actions: "passive", traits: [], description: "" }); break;
+      case "add-trait": {
+        const ab = s.abilities?.[Number(a.dataset.index)];
+        if (ab && !(ab.traits ??= []).includes(a.dataset.trait)) ab.traits.push(a.dataset.trait);
         break;
       }
       case "add-spell": {

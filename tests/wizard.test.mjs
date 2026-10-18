@@ -57,5 +57,15 @@ ok(app.spec.iwr.length === 0, "удаление IWR");
 const html = await app._renderHTML();
 ok(html.includes("3d10+12") && html.includes("Заклинатель") && html.includes("КС"), "итоговый рендер со всеми секциями");
 
+await click("add-custom-ability");
+const ci = app.spec.abilities.length - 1;
+ok(app.spec.abilities[ci].custom, "своя способность добавлена");
+app.spec.abilities[ci].name = "Устрашающее присутствие";
+app.spec.abilities[ci].description = "Аура страха 30 футов";
+let h2 = await app._renderHTML();
+ok(h2.includes("custom-ability") && h2.includes('data-trait="aura"'), "подсказка тегов в мастере");
+await click("add-trait", { index: String(ci), trait: "aura" });
+ok(app.spec.abilities[ci].traits.includes("aura"), "тег добавлен кликом");
+
 console.log(fail ? `ОШИБОК: ${fail}` : "Мастер работает на заглушках");
 process.exitCode = fail ? 1 : 0;

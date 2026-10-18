@@ -44,3 +44,11 @@
 .forge-tier.low { background: #2f5b8a; }
 .forge-tier.terrible { background: #555; }
 .forge-tier.off { outline: 1px dashed #fff; }
+
+.pf2e-forge .custom-ability { border: 1px solid rgba(127,127,127,.35); border-radius: 4px; padding: 4px 6px; margin: 4px 0; }
+.pf2e-forge .custom-ability textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+.pf2e-forge .custom-ability select { flex: 0 0 130px; }
+.pf2e-forge .chip { display: inline-block; padding: 0 6px; margin: 1px 2px; border-radius: 8px; background: rgba(127,127,127,.25); cursor: pointer; white-space: nowrap; }
+.pf2e-forge .chip:hover { background: rgba(127,127,127,.45); }
+.pf2e-forge .warn { color: #c9690e; }
+.pf2e-forge button.inline { flex: 0 0 auto; width: auto; white-space: nowrap; }
