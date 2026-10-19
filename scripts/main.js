@@ -1,7 +1,12 @@
 // Кузня существ — точка входа.
 import { CreatureForge } from "./wizard.js";
 import { registerSheetHints } from "./sheet-hints.js";
-import { registerRescaleUI, rescaleActor, openRescaleDialog } from "./rescale-ui.js";
+import { rescaleActor, openRescaleDialog } from "./rescale-ui.js";
+import { registerActorUI, applyTemplate, openForgeMenu } from "./actor-ui.js";
+import { TEMPLATES } from "./templates.js";
+import { addLoot } from "./loot.js";
+import { roleAbilities } from "./role-abilities.js";
+import { suggestTraits } from "./abilities.js";
 import { createCreature, searchAbilities, searchSpells, MODULE_ID, DEFAULT_FOLDER, folderName, ensureFolder, migrateLegacyFolders } from "./forge.js";
 import { computeStats, toActorData } from "./builder.js";
 import { ROLES, applyRole, emptySpec, maxSpellRank } from "./roles.js";
@@ -19,7 +24,7 @@ Hooks.once("init", () => {
     scope: "world", config: true, type: String, default: DEFAULT_FOLDER,
   });
   registerSheetHints();
-  registerRescaleUI();
+  registerActorUI();
 });
 
 Hooks.once("ready", () => {
@@ -46,6 +51,15 @@ Hooks.once("ready", () => {
     /** Пересчитать NPC на новый уровень (copy — создать копию). */
     rescale: (actor, level, opts) => rescaleActor(actor, level, opts),
     openRescale: (actor) => openRescaleDialog(actor),
+    /** Шаблоны: elite, weak, undead, aquatic, fiery, icy, shadow. */
+    templates: () => Object.fromEntries(Object.entries(TEMPLATES).map(([k, t]) => [k, { label: t.label, hint: t.hint }])),
+    applyTemplate: (actor, key, opts) => applyTemplate(actor, key, opts),
+    /** Добыча по таблице сокровищ GM Core: kind — boss | regular. */
+    addLoot: (actor, opts) => addLoot(actor, opts),
+    /** Готовые способности роли с числами под уровень. */
+    roleAbilities: (role, level) => roleAbilities(role, level),
+    suggestTraits,
+    openMenu: (actor) => openForgeMenu(actor),
   };
 
   if (game.users.activeGM?.isSelf) {

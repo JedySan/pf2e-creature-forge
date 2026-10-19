@@ -67,5 +67,12 @@ ok(h2.includes("custom-ability") && h2.includes('data-trait="aura"'), "подс�
 await click("add-trait", { index: String(ci), trait: "aura" });
 ok(app.spec.abilities[ci].traits.includes("aura"), "тег добавлен кликом");
 
+h2 = await app._renderHTML();
+ok(h2.includes("Шаблон и добыча") && h2.includes('data-action="add-role-ability"'), "шаблон, добыча и готовые способности роли в мастере");
+const before = app.spec.abilities.length;
+const key = h2.match(/data-action="add-role-ability" data-key="([^"]+)"/)[1];
+await click("add-role-ability", { key });
+ok(app.spec.abilities.length === before + 1 && app.spec.abilities.at(-1).traits, "готовая способность роли добавлена с тегами");
+
 console.log(fail ? `ОШИБОК: ${fail}` : "Мастер работает на заглушках");
 process.exitCode = fail ? 1 : 0;

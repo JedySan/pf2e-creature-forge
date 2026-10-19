@@ -1,5 +1,5 @@
 // Создание актёра в Foundry по спецификации: базовые данные + способности из компендиума + заклинания.
-import { customAbilityData } from "./abilities.js";
+import { customAbilityData, fixAuraRules } from "./abilities.js";
 import { computeStats, toActorData } from "./builder.js";
 
 export const MODULE_ID = "jedysan-kuznya";
@@ -145,12 +145,14 @@ export async function createCreature(spec, { openSheet = true } = {}) {
   for (const ref of abilityRefs) {
     if (ref.fromRole && roleAbilityAdded) continue;
     if (ref.custom) {
-      abilityDocs.push(customAbilityData(ref));
+      abilityDocs.push(customAbilityData(ref, stats.level));
       continue;
     }
     const doc = await resolveItem(ref, (q) => searchAbilities(q, 5));
     if (doc) {
-      abilityDocs.push(await localizedData(doc));
+      const data = await localizedData(doc);
+      fixAuraRules(data, stats.level);
+      abilityDocs.push(data);
       if (ref.fromRole) roleAbilityAdded = true;
     } else if (!ref.optional) {
       missing.push(ref.name ?? ref.uuid);
@@ -162,6 +164,18 @@ export async function createCreature(spec, { openSheet = true } = {}) {
   }
 
   if (stats.spellcasting) await addSpellcasting(actor, stats.spellcasting, missing);
+
+  // Шаблон и добыча — после всего остального (шаблон добавляет урон к ударам и свои способности).
+  const extras = [];
+  if (spec.template) {
+    const { applyTemplate } = await import("./actor-ui.js");
+    try { await applyTemplate(actor, spec.template); } catch (e) { extras.push(`шаблон: ${e.message}`); }
+  }
+  if (spec.loot) {
+    const { addLoot } = await import("./loot.js");
+    try { await addLoot(actor, { kind: spec.loot }); } catch (e) { extras.push(`добыча: ${e.message}`); }
+  }
+  if (extras.length) stats.warnings.push(...extras);
 
   if (openSheet) actor.sheet.render(true);
   return { actor, stats, warnings: stats.warnings, missing };

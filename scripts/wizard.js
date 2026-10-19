@@ -3,6 +3,8 @@ import { computeStats } from "./builder.js";
 import { ROLES, applyRole, emptySpec, maxSpellRank } from "./roles.js";
 import { STAT_TIERS, TIER_RU_FULL, MIN_LEVEL, MAX_LEVEL, hpRange } from "./tables.js";
 import { createCreature, searchAbilities, searchSpells, TRADITION_RU, CAST_TYPE_RU } from "./forge.js";
+import { roleAbilities } from "./role-abilities.js";
+import { TEMPLATES } from "./templates.js";
 import { ACTION_TYPES, COMMON_TRAITS, suggestTraits, normalizeTraits } from "./abilities.js";
 import { ATTR_RU, SAVE_RU, SKILL_RU, SIZE_RU, RARITY_RU, DAMAGE_RU, IWR_KIND_RU, IWR_TYPES, TRADITION_LIST } from "./labels.js";
 
@@ -213,6 +215,22 @@ export class CreatureForge extends ApplicationV2 {
           <div class="row"><input type="text" class="grow" data-search="ability" placeholder="Найти способность: Захват, Реактивный удар…" value="${esc(this.abilityQuery ?? "")}">
             <button type="button" data-action="add-custom-ability" class="inline">＋ Своя способность</button></div>
           ${abilityResults}
+          ${(() => {
+            const have = new Set((s.abilities ?? []).map((a) => a.key ?? a.name));
+            const sugg = roleAbilities(s.role, s.level).filter((a) => !have.has(a.key) && !have.has(a.name));
+            return sugg.length ? `<div class="row small">Готовые для роли «${esc(role.label)}»: ${sugg.map((a) => `<a class="chip" data-action="add-role-ability" data-key="${esc(a.key)}" title="${esc(a.description)}">＋${esc(a.name)}</a>`).join(" ")}</div>` : "";
+          })()}
+
+          <h3>Шаблон и добыча</h3>
+          <div class="row">
+            <label>Шаблон</label>
+            <select data-path="template"><option value="">Без шаблона</option>${options(Object.fromEntries(Object.entries(TEMPLATES).map(([k, t]) => [k, t.label])), s.template ?? "")}</select>
+          </div>
+          ${s.template ? `<div class="muted small">${esc(TEMPLATES[s.template]?.hint)}</div>` : ""}
+          <div class="row">
+            <label>Добыча</label>
+            <select data-path="loot">${options({ "": "Без добычи", boss: "Как боссу: магический предмет, расходник, монеты", regular: "Как обычному врагу: расходник, монеты" }, s.loot ?? "")}</select>
+          </div>
 
           <h3>Описание</h3>
           <textarea data-path="description" rows="3">${esc(s.description)}</textarea>
@@ -261,7 +279,7 @@ export class CreatureForge extends ApplicationV2 {
     if (d.search) return;
 
     if (d.role !== undefined) {
-      const keep = { name: this.spec.name, level: this.spec.level, size: this.spec.size, rarity: this.spec.rarity, traits: this.spec.traits, languages: this.spec.languages, senses: this.spec.senses, iwr: this.spec.iwr, abilities: this.spec.abilities, description: this.spec.description };
+      const keep = { name: this.spec.name, level: this.spec.level, size: this.spec.size, rarity: this.spec.rarity, traits: this.spec.traits, languages: this.spec.languages, senses: this.spec.senses, iwr: this.spec.iwr, abilities: this.spec.abilities, description: this.spec.description, template: this.spec.template, loot: this.spec.loot };
       this.spec = { ...applyRole(this.spec, t.value), ...keep };
     } else if (d.spellcasting !== undefined) {
       this.spec.spellcasting = t.checked ? { tradition: "arcane", type: "innate", tier: "moderate", attribute: "cha", spells: [] } : null;
@@ -306,6 +324,11 @@ export class CreatureForge extends ApplicationV2 {
       case "add-ability": {
         const r = this.abilityResults[Number(a.dataset.index)];
         if (r) (s.abilities ??= []).push({ uuid: r.uuid, name: r.name });
+        break;
+      }
+      case "add-role-ability": {
+        const ab = roleAbilities(s.role, s.level).find((x) => x.key === a.dataset.key);
+        if (ab) (s.abilities ??= []).push(structuredClone(ab));
         break;
       }
       case "add-custom-ability": (s.abilities ??= []).push({ custom: true, name: "", actions: "passive", traits: [], description: "" }); break;

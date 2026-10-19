@@ -3,6 +3,7 @@
 // новое = значение ступени на новом уровне + (старое − значение ступени на старом уровне).
 // Работает с исходными данными (_source), чтобы не учитывать Элитный/Слабый шаблон дважды.
 import { STAT_TIERS, statValue, strikeDamage, spellStats, averageDamage, hpRange } from "./tables.js";
+import { fixAuraRules } from "./abilities.js";
 
 function nearestTier(stat, level, value, tiers = STAT_TIERS[stat]) {
   let best = null;
@@ -125,6 +126,18 @@ export function rescaleUpdates(src, items, to) {
       if (mainKey) iu[`system.damageRolls.${mainKey}.damage`] = shiftDamage(from, to, rolls[mainKey].damage);
       itemUpdates.push(iu);
       changes.push(`${it.name}: +${bonus} → +${iu["system.bonus.value"]}${mainKey ? `, ${rolls[mainKey].damage} → ${iu[`system.damageRolls.${mainKey}.damage`]}` : ""}`);
+    } else if (it.type === "action") {
+      // КС в тексте способности (@Check[…|dc:30], «КС 30», «DC 30») — той же ступенью на новом уровне.
+      const iu = { _id: it._id };
+      const desc = it.system?.description?.value ?? "";
+      const nd = desc
+        .replace(/(@Check\[[^\]]*?dc:)(\d+)/g, (m, pre, n) => pre + shiftSpellDc(from, to, Number(n)))
+        .replace(/(^|[^\p{L}])(КС|DC) (\d+)(?!\d)/gu, (m, pre, w, n) => `${pre}${w} ${shiftSpellDc(from, to, Number(n))}`);
+      if (nd !== desc) { iu["system.description.value"] = nd; changes.push(`${it.name}: КС в описании пересчитаны`); }
+      // Аура с радиусом 0 — радиус из текста или по уровню.
+      const data = { name: it.name, system: { description: { value: nd }, rules: structuredClone(it.system?.rules ?? []) } };
+      if (fixAuraRules(data, to)) { iu["system.rules"] = data.system.rules; changes.push(`${it.name}: радиус ауры ${data.system.rules.find((r) => r.key === "Aura")?.radius} фт`); }
+      if (Object.keys(iu).length > 1) itemUpdates.push(iu);
     } else if (it.type === "spellcastingEntry") {
       const dc = it.system?.spelldc?.dc;
       if (typeof dc === "number") {

@@ -52,30 +52,3 @@ export async function openRescaleDialog(actor) {
     ui.notifications.error(`Кузня: ${e.message}`);
   }
 }
-
-/** Точки входа: шапка листа и меню правого клика в каталоге актёров. */
-export function registerRescaleUI() {
-  Hooks.on("getActorSheetHeaderButtons", (sheet, buttons) => {
-    if (!game.user.isGM || sheet.actor?.type !== "npc") return;
-    buttons.unshift({ label: "Сменить уровень", class: "forge-rescale", icon: "fa-solid fa-arrows-up-down", onclick: () => openRescaleDialog(sheet.actor) });
-  });
-  // Листы на ApplicationV2 — кнопка в меню шапки.
-  Hooks.on("getHeaderControlsApplicationV2", (app, controls) => {
-    const actor = app.document ?? app.actor;
-    if (!game.user.isGM || !(actor instanceof Actor) || actor.type !== "npc") return;
-    controls.unshift({ label: "Сменить уровень (Кузня)", icon: "fa-solid fa-arrows-up-down", action: "forgeRescale", onClick: () => openRescaleDialog(actor) });
-  });
-
-  const entry = (getId) => ({
-    name: "Сменить уровень (Кузня)",
-    icon: '<i class="fa-solid fa-arrows-up-down"></i>',
-    condition: (li) => game.user.isGM && game.actors.get(getId(li))?.type === "npc",
-    callback: (li) => openRescaleDialog(game.actors.get(getId(li))),
-  });
-  const idOf = (li) => {
-    const el = li instanceof HTMLElement ? li : li?.[0];
-    return el?.dataset?.entryId ?? el?.dataset?.documentId;
-  };
-  Hooks.on("getActorContextOptions", (app, options) => options.push(entry(idOf)));       // v13+
-  Hooks.on("getActorDirectoryEntryContext", (html, options) => options.push(entry(idOf))); // v12
-}

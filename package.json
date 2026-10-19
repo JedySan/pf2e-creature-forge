@@ -2,5 +2,5 @@
   "name": "pf2e-creature-forge",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node tests/tables.test.mjs && node tests/builder.test.mjs && node tests/wizard.test.mjs && node tests/rescale.test.mjs && node tests/abilities.test.mjs" }
+  "scripts": { "test": "node tests/tables.test.mjs && node tests/builder.test.mjs && node tests/wizard.test.mjs && node tests/rescale.test.mjs && node tests/abilities.test.mjs && node tests/v1.test.mjs" }
 }

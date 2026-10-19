@@ -1,5 +1,6 @@
 // Свои способности существа: данные предмета pf2e и подбор трейтов (тегов).
 // Чистые функции — их же используют мастер, создание через API и тесты.
+import { defaultAuraRadius } from "./role-abilities.js";
 
 export const ACTION_TYPES = {
   passive: "Пассивная",
@@ -77,7 +78,32 @@ export function normalizeTraits(list, labels = {}) {
 }
 
 /** Данные предмета-способности pf2e (type: action) из описания своей способности. */
-export function customAbilityData(ab) {
+/** Радиус ауры из описания («Аура 30 футов», «30-foot aura») или по уровню. */
+export function auraRadiusOf(ab, level) {
+  if (Number(ab?.auraRadius) > 0) return Number(ab.auraRadius);
+  const m = String(ab?.description ?? "").match(/(\d+)[\s-]*(?:фут|feet|foot|ft)/i);
+  return m ? Number(m[1]) : defaultAuraRadius(level ?? 1);
+}
+
+/**
+ * Починить ауры у готовой способности (из компендиума): правило Aura с радиусом 0 или без радиуса
+ * получает радиус из названия/описания или по уровню. Меняет data на месте, возвращает true, если правил.
+ */
+export function fixAuraRules(data, level) {
+  let fixed = false;
+  for (const r of data?.system?.rules ?? []) {
+    if (r?.key !== "Aura") continue;
+    const n = Number(r.radius);
+    if (typeof r.radius === "string" && r.radius.includes("@")) continue; // формула — не трогаем
+    if (!Number.isFinite(n) || n <= 0) {
+      r.radius = auraRadiusOf({ description: `${data.name ?? ""} ${data.system?.description?.value ?? ""}` }, level);
+      fixed = true;
+    }
+  }
+  return fixed;
+}
+
+export function customAbilityData(ab, level = 1) {
   const at = String(ab.actions ?? "passive");
   const n = ["1", "2", "3"].includes(at) ? Number(at) : null;
   const actionType = n ? "action" : at;
@@ -98,6 +124,15 @@ export function customAbilityData(ab) {
       category: at === "passive" || at === "reaction" ? "defensive" : "offensive",
       traits: { value: traits, rarity: "common", otherTags: [] },
       description: { value: description.startsWith("<") ? description : description.split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("") },
+      rules: traits.includes("aura")
+        ? [{ key: "Aura", radius: auraRadiusOf(ab, level), slug: slugify(ab.key ?? ab.name), traits: traits.filter((t) => t !== "aura") }]
+        : [],
+      slug: ab.key ? slugify(ab.key) : null,
     },
   };
+}
+
+function slugify(s) {
+  const map = { а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya" };
+  return String(s ?? "ability").toLowerCase().split("").map((c) => map[c] ?? c).join("").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "ability";
 }

@@ -18,6 +18,8 @@
 //   iwr: [{ kind: "immunity|weakness|resistance", type: "fire", value?: "max|min"|число }],
 //   abilities: [{ uuid } | { name } | { custom: true, name, actions: "passive|free|reaction|1|2|3",
 //                traits: ["aura", "emotion"], description }],   // свои: трейты подбираются, если не заданы
+//   template?: "elite|weak|undead|aquatic|fiery|icy|shadow",   // наложить после создания
+//   loot?: "boss|regular",                                       // добыча по таблице сокровищ GM Core
 // }
 // Тир: "extreme" | "high" | "moderate" | "low" | "terrible".
 import { statValue, strikeDamage, spellStats, averageDamage, hpRange, TIER_RU } from "./tables.js";
