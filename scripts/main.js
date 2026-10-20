@@ -20,7 +20,7 @@ Hooks.once("init", () => {
   });
   game.settings.register(MODULE_ID, "folderName", {
     name: "Папка для созданных врагов",
-    hint: "Сюда кладутся существа из Кузни и монстры, которых импортирует PF2e Claude Bridge.",
+    hint: "Сюда кладутся существа из Кузни и монстры, которых импортирует Умный помощник.",
     scope: "world", config: true, type: String, default: DEFAULT_FOLDER,
   });
   registerSheetHints();
@@ -29,7 +29,7 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   const mod = game.modules.get(MODULE_ID);
-  // Публичный API — им пользуется PF2e Claude Bridge (и любые макросы).
+  // Публичный API — им пользуется Умный помощник (и любые макросы).
   mod.api = {
     /** Открыть мастер; spec — необязательная заготовка (например, от Claude). */
     open: (spec) => new CreatureForge(spec).render(true),
@@ -45,7 +45,7 @@ Hooks.once("ready", () => {
     maxSpellRank,
     tables,
     toActorData,
-    /** Общая папка для созданных врагов (её же использует PF2e Claude Bridge). */
+    /** Общая папка для созданных врагов (её же использует Умный помощник). */
     folderName,
     ensureFolder,
     /** Пересчитать NPC на новый уровень (copy — создать копию). */

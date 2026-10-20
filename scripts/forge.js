@@ -4,7 +4,7 @@ import { computeStats, toActorData } from "./builder.js";
 
 export const MODULE_ID = "jedysan-kuznya";
 export const DEFAULT_FOLDER = "Созданные враги";
-// Папки прошлых версий Кузни и PF2e Claude Bridge — их содержимое переносится в общую.
+// Папки прошлых версий Кузни и Умный помощник — их содержимое переносится в общую.
 const LEGACY_FOLDERS = ["Кузня существ", "Claude — энкаунтеры"];
 
 export function folderName() {
