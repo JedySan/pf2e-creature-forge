@@ -18,6 +18,9 @@ export async function rescaleActor(actor, level, { copy = false } = {}) {
   const up = rescaleUpdates(target._source, target.items.map((i) => i._source), level);
   await target.update(up.actor);
   if (up.items.length) await target.updateEmbeddedDocuments("Item", up.items);
+  // pf2e обрезает текущие HP по старому максимуму в том же обновлении — долечиваем до нового максимума.
+  const hp = target.system.attributes?.hp;
+  if (hp && hp.value < hp.max) await target.update({ "system.attributes.hp.value": hp.max });
   return { actor: target, from: up.from, to: up.to, changes: up.changes };
 }
 
