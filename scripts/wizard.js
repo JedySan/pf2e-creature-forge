@@ -30,7 +30,9 @@ function tierOptions(stat, selected) {
 
 export class CreatureForge extends ApplicationV2 {
   static DEFAULT_OPTIONS = {
-    id: "jedysan-kuznya",
+    // {id} — Foundry подставит уникальный номер: можно открыть несколько мастеров
+    // (например, Claude открывает заготовку, пока ГМ уже работает в мастере).
+    id: "jedysan-kuznya-{id}",
     classes: ["pf2e-forge"],
     window: { title: "Кузня существ", resizable: true, icon: "fa-solid fa-hammer" },
     position: { width: 900, height: 820 },

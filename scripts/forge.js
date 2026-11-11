@@ -135,10 +135,13 @@ export async function createCreature(spec, { openSheet = true } = {}) {
   const actor = await Actor.implementation.create(data);
   const missing = [];
 
-  // Способности: выбранные + рекомендованные ролью (по имени, если найдутся).
+  // Способности: выбранные + рекомендованная ролью. У роли несколько вариантов названия
+  // (рус./англ./старое) — пробуем по очереди, добавляем первый найденный.
   const abilityRefs = [...(spec.abilities ?? [])];
-  for (const name of spec.roleAbilities ?? []) {
-    if (!abilityRefs.some((a) => a.fromRole)) abilityRefs.push({ name, fromRole: true, optional: true });
+  const have = new Set(abilityRefs.map((a) => String(a.name ?? "").toLowerCase()));
+  const roleNames = spec.roleAbilities ?? [];
+  if (!roleNames.some((n) => have.has(String(n).toLowerCase()))) {
+    for (const name of roleNames) abilityRefs.push({ name, fromRole: true, optional: true });
   }
   const abilityDocs = [];
   let roleAbilityAdded = false;

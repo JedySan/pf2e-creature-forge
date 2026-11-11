@@ -116,12 +116,12 @@ export function registerActorUI() {
     ["Кузня: сменить уровень", "fa-arrows-up-down", openRescaleDialog],
     ["Кузня: шаблон", "fa-layer-group", openTemplateDialog],
     ["Кузня: добыча", "fa-coins", openLootDialog],
-  ].map(([name, icon, fn]) => ({
-    name,
-    icon: `<i class="fa-solid ${icon}"></i>`,
-    condition: (li) => game.user.isGM && game.actors.get(idOf(li))?.type === "npc",
-    callback: (li) => fn(game.actors.get(idOf(li))),
-  }));
+  ].map(([name, icon, fn]) => {
+    const visible = (li) => game.user.isGM && game.actors.get(idOf(li))?.type === "npc";
+    const run = (li) => fn(game.actors.get(idOf(li)));
+    // name/condition/callback — Foundry 13, label/visible/onClick — новые меню Foundry 14.
+    return { name, label: name, icon: `<i class="fa-solid ${icon}"></i>`, condition: visible, visible, callback: run, onClick: (ev, li) => run(li ?? ev) };
+  });
   Hooks.on("getActorContextOptions", (app, options) => options.push(...entries));       // v13+
   Hooks.on("getActorDirectoryEntryContext", (html, options) => options.push(...entries)); // v12
 }

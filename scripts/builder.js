@@ -89,7 +89,8 @@ export function computeStats(spec) {
     hp: resolve("hp", level, spec.hp),
     saves,
     skills,
-    speed: { land: 25, ...(spec.speed ?? {}) },
+    // Пустые поля скорости в мастере приходят как null — не даём им обнулить наземную скорость.
+    speed: { land: 25, ...Object.fromEntries(Object.entries(spec.speed ?? {}).filter(([, v]) => v !== null && v !== "" && Number.isFinite(Number(v)))) },
     strikes,
     spellcasting,
     iwr,
